@@ -1,11 +1,11 @@
 package me.isaiah.common;
 
-import net.minecraft.resource.ResourcePackProfile;
-import net.minecraft.resource.metadata.PackResourceMetadata;
+import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
+import net.minecraft.server.packs.repository.Pack;
 
 public interface IDatapack {
 
-    public ResourcePackProfile get_minecraft();
+    public Pack get_minecraft();
 
     public String get_raw_id();
 
@@ -17,7 +17,7 @@ public interface IDatapack {
      * 1.20.2+ only
      * NULL on <=1.20.1
      */
-	PackResourceMetadata get_metadata();
+	PackMetadataSection get_metadata();
 
 	
 }

@@ -8,21 +8,21 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import me.isaiah.common.ICommonMod;
 import me.isaiah.common.cmixin.IMixinResourcePackProfile;
-import net.minecraft.resource.ResourcePack;
-import net.minecraft.resource.ResourcePackProfile;
-import net.minecraft.resource.metadata.PackResourceMetadata;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
+import net.minecraft.server.packs.repository.Pack;
 
-@Mixin(ResourcePackProfile.class)
+@Mixin(Pack.class)
 public class MixinResourcePackProfile implements IMixinResourcePackProfile {
 
 	// Lnet/minecraft/resource/ResourcePackProfile;packFactory:Lnet/minecraft/resource/ResourcePackProfile$PackFactory;
 	@Shadow
-	public ResourcePackProfile.PackFactory packFactory;
+	public Pack.ResourcesSupplier resources;
 	
 	@Override
-	public ResourcePack IC$open_pack(String id) {
-		ResourcePackProfile handle = ((ResourcePackProfile)(Object)this);
-		try (ResourcePack pack = packFactory.open(handle.getInfo())) {
+	public PackResources IC$open_pack(String id) {
+		Pack handle = ((Pack)(Object)this);
+		try (PackResources pack = resources.openPrimary(handle.location())) {
         	return pack;
 			//this.resourcePackInfo = pack.parseMetadata(PackResourceMetadata.SERIALIZER);
         } catch (Exception e) { // This is already called in NMS then if in NMS not happen is secure this not throw here
@@ -31,11 +31,11 @@ public class MixinResourcePackProfile implements IMixinResourcePackProfile {
 	}
 
 	@Override
-	public PackResourceMetadata IC$open_and_parse_metadata() {
-		ResourcePackProfile handle = ((ResourcePackProfile)(Object)this);
-		try (ResourcePack pack = packFactory.open(handle.getInfo())) {
+	public PackMetadataSection IC$open_and_parse_metadata() {
+		Pack handle = ((Pack)(Object)this);
+		try (PackResources pack = resources.openPrimary(handle.location())) {
 			
-        	return pack.parseMetadata(PackResourceMetadata.SERIALIZER);
+        	return pack.getMetadataSection(PackMetadataSection.TYPE);
         } catch (IOException e) { // This is already called in NMS then if in NMS not happen is secure this not throw here
         	throw new RuntimeException(e);
         }
@@ -43,17 +43,17 @@ public class MixinResourcePackProfile implements IMixinResourcePackProfile {
 
 	@Override
 	public String IC$get_raw_id() {
-		return ((ResourcePackProfile)(Object)this).getId();
+		return ((Pack)(Object)this).getId();
 	}
 
 	@Override
 	public boolean IC$is_required() {
-		return ((ResourcePackProfile)(Object)this).isRequired();
+		return ((Pack)(Object)this).isRequired();
 	}
 
 	@Override
 	public boolean IC$is_enabled() {
-		return ICommonMod.getIServer().getMinecraft().getDataPackManager().getEnabledIds().contains(this.IC$get_raw_id());
+		return ICommonMod.getIServer().getMinecraft().getPackRepository().getSelectedIds().contains(this.IC$get_raw_id());
 	}
 
 }

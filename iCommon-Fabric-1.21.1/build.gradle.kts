@@ -1,7 +1,7 @@
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-    id ("fabric-loom")
+    id ("net.fabricmc.fabric-loom-remap") version "1.15-SNAPSHOT"
     id ("maven-publish")
 	id ("java-library")
 }
@@ -11,11 +11,32 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+// Preprocess
+extensions.extraProperties["targetVersion"] = "mc211"
+extensions.extraProperties["inputSourceDir"] = "${rootProject.projectDir}/iCommon-API/src/main/java"
+// extensions.extraProperties["excludedFiles"] =
+    //listOf("java/me/isaiah/multiworld/command/GameruleCommand.java")
+    //      java/me/isaiah/multiworld/command/GameruleCommand.java
+
+
+val createPreprocessor = rootProject.extra["createPreprocessor"] as groovy.lang.Closure<*>
+createPreprocessor.call(project)
+
+
 base {
     archivesName = "iCommon-Fabric"
     version = "1.21.1"
     group = "com.javazilla.mods"
 }
+
+// Grab Mojang Mappings with Identifier instead of ResourceLocation
+repositories {
+    mavenCentral()  
+    maven {         
+        url = uri("https://pisaiah.com/maven-repo")
+    }
+}
+
 
 dependencies {
 	// annotationProcessor("com.github.bsideup.jabel:jabel-javac-plugin:0.4.2")
@@ -29,14 +50,17 @@ dependencies {
 
 	// 1.21.1
     minecraft("com.mojang:minecraft:1.21.1")
-    mappings("net.fabricmc:yarn:1.21.1+build.3")
+    mappings(loom.layered {
+        mappings(file("mappings-identifier.jar"))
+
+    })
     modImplementation("net.fabricmc:fabric-loader:" + project.property("loader_version"))
 }
 
 sourceSets {
     main {
         java {
-            srcDir("${rootProject.projectDir}/iCommon-API/src/main/java/com")
+            // srcDir("${rootProject.projectDir}/iCommon-API/src/main/java/com")
             //srcDir("${rootProject.projectDir}/iCommon-Fabric-1.17/src/main/java")
 
             // Needs fixing for 1.18:

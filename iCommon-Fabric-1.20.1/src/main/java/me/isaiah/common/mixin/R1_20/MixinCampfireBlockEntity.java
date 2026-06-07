@@ -7,21 +7,21 @@ import org.spongepowered.asm.mixin.Shadow;
 import me.isaiah.common.R117.ICampfireBlockEntity;
 import me.isaiah.common.event.EventRegistery;
 import me.isaiah.common.event.entity.CampfireBlockEntityCookEvent;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.CampfireBlockEntity;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.Containers;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.CampfireBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(value = CampfireBlockEntity.class, priority = 90)
 public class MixinCampfireBlockEntity implements ICampfireBlockEntity {
 
     @Shadow
-    public DefaultedList<ItemStack> itemsBeingCooked;
+    public NonNullList<ItemStack> items;
 
     /**
      * @author Isaiah
@@ -29,30 +29,30 @@ public class MixinCampfireBlockEntity implements ICampfireBlockEntity {
      */
 	 // TODO: Update to 1.19.4
     @Overwrite
-    public static void litServerTick(World world, BlockPos pos, BlockState state, CampfireBlockEntity mc) {
+    public static void cookTick(Level world, BlockPos pos, BlockState state, CampfireBlockEntity mc) {
         ICampfireBlockEntity helper = (ICampfireBlockEntity)(Object)mc;
-        for (int i = 0; i < mc.getItemsBeingCooked().size(); ++i) {
-            ItemStack itemstack = (ItemStack) mc.getItemsBeingCooked().get(i);
+        for (int i = 0; i < mc.getItems().size(); ++i) {
+            ItemStack itemstack = (ItemStack) mc.getItems().get(i);
 
             if (!itemstack.isEmpty()) {
                 helper.IgetCookingTimes()[i]++;
 
                 if (helper.IgetCookingTimes()[i] >= helper.IgetCookingTotalTimes()[i]) {
-                    SimpleInventory inventorysubcontainer = new SimpleInventory(new ItemStack[]{itemstack});
-                    ItemStack itemstack1 = (ItemStack) mc.getWorld().getRecipeManager().getFirstMatch(RecipeType.CAMPFIRE_COOKING, inventorysubcontainer, mc.getWorld()).map((recipecampfire) -> {
-                        return recipecampfire.craft(inventorysubcontainer, world.getRegistryManager());
+                    SimpleContainer inventorysubcontainer = new SimpleContainer(new ItemStack[]{itemstack});
+                    ItemStack itemstack1 = (ItemStack) mc.getLevel().getRecipeManager().getRecipeFor(RecipeType.CAMPFIRE_COOKING, inventorysubcontainer, mc.getLevel()).map((recipecampfire) -> {
+                        return recipecampfire.assemble(inventorysubcontainer, world.registryAccess());
                     }).orElse(itemstack);
-                    BlockPos blockposition = mc.getPos();
+                    BlockPos blockposition = mc.getBlockPos();
 
                     CampfireBlockEntityCookEvent event = (CampfireBlockEntityCookEvent)EventRegistery.invoke(CampfireBlockEntityCookEvent.class,
-                            new CampfireBlockEntityCookEvent(mc.getWorld(), pos, itemstack, itemstack1));
+                            new CampfireBlockEntityCookEvent(mc.getLevel(), pos, itemstack, itemstack1));
 
                     if (event.isCanceled()) return;
 
                     itemstack1 = (ItemStack) event.getResult();
 
-                    ItemScatterer.spawn(mc.getWorld(), (double) blockposition.getX(), (double) blockposition.getY(), (double) blockposition.getZ(), itemstack1);
-                    mc.getItemsBeingCooked().set(i, ItemStack.EMPTY);
+                    Containers.dropItemStack(mc.getLevel(), (double) blockposition.getX(), (double) blockposition.getY(), (double) blockposition.getZ(), itemstack1);
+                    mc.getItems().set(i, ItemStack.EMPTY);
                     helper.IupdateListeners();
                 }
             }
@@ -61,29 +61,29 @@ public class MixinCampfireBlockEntity implements ICampfireBlockEntity {
     }
 
     @Shadow
-    public int[] cookingTimes;
+    public int[] cookingProgress;
 
     @Shadow
-    public int[] cookingTotalTimes;
+    public int[] cookingTime;
 
     @Shadow
-    public void updateListeners() {
+    public void markUpdated() {
     }
 
 
     @Override
     public int[] IgetCookingTimes() {
-        return cookingTimes;
+        return cookingProgress;
     }
 
     @Override
     public int[] IgetCookingTotalTimes() {
-        return cookingTotalTimes;
+        return cookingTime;
     }
 
     @Override
     public void IupdateListeners() {
-        updateListeners();
+        markUpdated();
     }
 
 }

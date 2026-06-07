@@ -1,6 +1,6 @@
 package me.isaiah.common.cmixin;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public interface IMixinLootableContainerBlockEntity {
 

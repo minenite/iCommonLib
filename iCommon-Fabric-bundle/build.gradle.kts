@@ -1,7 +1,7 @@
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-    id ("fabric-loom")
+    id ("net.fabricmc.fabric-loom-remap") version "1.15-SNAPSHOT"
     id ("maven-publish")
 	id ("java-library")
 }
@@ -25,16 +25,17 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:" + project.property("loader_version"))
 	
 	// bundle jars
-	include(project(":iCommon-Fabric-1.18.2"))
-	include(project(":iCommon-Fabric-1.19.2"))
+	// include(project(":iCommon-Fabric-1.18.2"))
+	// include(project(":iCommon-Fabric-1.19.2"))
 	// include(project(":iCommon-Fabric-1.19.4"))
 	include(project(":iCommon-Fabric-1.20.1"))
-	include(project(":iCommon-Fabric-1.20.4"))
-	include(project(":iCommon-Fabric-1.20.6"))
+	// include(project(":iCommon-Fabric-1.20.4"))
+	// include(project(":iCommon-Fabric-1.20.6"))
 	include(project(":iCommon-Fabric-1.21.1"))
-	include(project(":iCommon-Fabric-1.21.4"))
-	include(project(":iCommon-Fabric-1.21.8"))
-	include(project(":iCommon-Fabric-1.21.9"))
+	// include(project(":iCommon-Fabric-1.21.4"))
+	// include(project(":iCommon-Fabric-1.21.8"))
+	include(project(":iCommon-Fabric-1.21.11"))
+	include(project(":iCommon-Fabric-26.1"))
 
 	annotationProcessor("com.pkware.jabel:jabel-javac-plugin:1.0.1-1")
     compileOnly("com.pkware.jabel:jabel-javac-plugin:1.0.1-1")

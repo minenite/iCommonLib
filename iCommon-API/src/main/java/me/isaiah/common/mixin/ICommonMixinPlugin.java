@@ -19,8 +19,8 @@ import me.isaiah.common.cmixin.MixinList;
 import me.isaiah.common.event.EventRegistery;
 import me.isaiah.common.event.ShouldApplyMixinEvent;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.MinecraftVersion;
-import net.minecraft.util.JsonHelper;
+import net.minecraft.DetectedVersion;
+import net.minecraft.util.GsonHelper;
 
 public class ICommonMixinPlugin implements IMixinConfigPlugin {
 
@@ -51,10 +51,10 @@ public class ICommonMixinPlugin implements IMixinConfigPlugin {
     /*
      */
     public static GameVersion create() {
-        try (InputStream inputStream = MinecraftVersion.class.getResourceAsStream("/version.json");){
+        try (InputStream inputStream = DetectedVersion.class.getResourceAsStream("/version.json");){
             if (inputStream == null) return null;
             try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);){
-                return new GameVersion(JsonHelper.deserialize(inputStreamReader));
+                return new GameVersion(GsonHelper.parse(inputStreamReader));
             }
         } catch (Exception exception) {
             throw new IllegalStateException("Bad version info", exception);

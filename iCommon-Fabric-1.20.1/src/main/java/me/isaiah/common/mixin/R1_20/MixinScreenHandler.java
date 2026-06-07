@@ -4,20 +4,20 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import me.isaiah.common.cmixin.IMixinScreenHandler;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 
-@Mixin(ScreenHandler.class)
+@Mixin(AbstractContainerMenu.class)
 public class MixinScreenHandler implements IMixinScreenHandler {
 
     @Shadow
-    public DefaultedList<Slot> slots;
+    public NonNullList<Slot> slots;
 
     @SuppressWarnings("unchecked")
     @Override
     public void ic_setSlots(Object o) {
-        this.slots = (DefaultedList<Slot>) o;
+        this.slots = (NonNullList<Slot>) o;
     }
     
 }

@@ -1,23 +1,23 @@
 package me.isaiah.common;
 
-import net.minecraft.block.entity.BeehiveBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.BeeEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Bee;
+import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class LazyBee {
 
-    public static void IC$add_bee_to_beehive(BlockEntity tileentity, ServerWorld world, int rand) {
+    public static void IC$add_bee_to_beehive(BlockEntity tileentity, ServerLevel world, int rand) {
 		if (tileentity instanceof BeehiveBlockEntity) {
             BeehiveBlockEntity beehive = (BeehiveBlockEntity) tileentity;
-            BeeEntity bee = new BeeEntity(EntityType.BEE, world);
+            Bee bee = new Bee(EntityType.BEE, world);
             
             // BeeEntity bee = EntityType.BEE.create(world);
             
             // BeeEntity bee = LazyBee.get(world);
             
-            beehive.tryEnterHive(bee, false, rand);
+            beehive.addOccupantWithPresetTicks(bee, false, rand);
         }
 	}
 

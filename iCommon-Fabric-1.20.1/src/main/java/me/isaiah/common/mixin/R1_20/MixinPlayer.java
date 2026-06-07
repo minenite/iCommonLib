@@ -16,32 +16,32 @@ import me.isaiah.common.entity.IPlayer;
 import me.isaiah.common.event.EventRegistery;
 import me.isaiah.common.event.entity.player.PlayerGamemodeChangeEvent;
 import me.isaiah.common.event.entity.player.ServerPlayerInitEvent;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.world.GameMode;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.GameType;
 
-@Mixin(ServerPlayerEntity.class)
+@Mixin(ServerPlayer.class)
 public class MixinPlayer extends MixinEntity {
 
     @Override
-    public void IsendText(Text text, UUID id) {
+    public void IsendText(Component text, UUID id) {
         // ((ServerPlayerEntity)IgetMCEntity()).sendMessage(text, MessageType.CHAT, null == id ? Util.NIL_UUID : id);
-        ((ServerPlayerEntity)IgetMCEntity()).sendMessage(text, false);
+        ((ServerPlayer)IgetMCEntity()).displayClientMessage(text, false);
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
     //public void init(MinecraftServer server, ServerWorld world, GameProfile profile, PlayerPublicKey key, CallbackInfo ci) {
-    public void init(MinecraftServer server, ServerWorld world, GameProfile profile, CallbackInfo ci) {
+    public void init(MinecraftServer server, ServerLevel world, GameProfile profile, CallbackInfo ci) {
         EventRegistery.invoke(ServerPlayerInitEvent.class, new ServerPlayerInitEvent((IPlayer)((IMixinEntity)IgetMCEntity()).getAsICommon()));
     }
 
-    @Inject(at = @At("HEAD"), method = "setGameMode", cancellable = true)
-    public void setGameMode(NbtCompound nbt, CallbackInfo ci) {
-        net.minecraft.world.GameMode gm = gameModeFromNbt(nbt, "playerGameType");
-        GameMode old = ((ServerPlayerEntity)(Object)this).interactionManager.getGameMode(); 
+    @Inject(at = @At("HEAD"), method = "loadGameTypes", cancellable = true)
+    public void setGameMode(CompoundTag nbt, CallbackInfo ci) {
+        net.minecraft.world.level.GameType gm = readPlayerMode(nbt, "playerGameType");
+        GameType old = ((ServerPlayer)(Object)this).gameMode.getGameModeForPlayer(); 
         if (null == old) {
             return;
         }
@@ -58,7 +58,7 @@ public class MixinPlayer extends MixinEntity {
     }
 
     @Shadow
-    private static net.minecraft.world.GameMode gameModeFromNbt(NbtCompound tag, String key) {
+    private static net.minecraft.world.level.GameType readPlayerMode(CompoundTag tag, String key) {
         return null;
     }
 

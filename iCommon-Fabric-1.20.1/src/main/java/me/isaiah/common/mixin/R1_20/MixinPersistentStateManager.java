@@ -3,15 +3,15 @@ package me.isaiah.common.mixin.R1_20;
 import org.spongepowered.asm.mixin.Mixin;
 
 import me.isaiah.common.cmixin.IMixinPersistentStateManager;
-import net.minecraft.world.ForcedChunkState;
-import net.minecraft.world.PersistentStateManager;
+import net.minecraft.world.level.ForcedChunksSavedData;
+import net.minecraft.world.level.storage.DimensionDataStorage;
 
-@Mixin(PersistentStateManager.class)
+@Mixin(DimensionDataStorage.class)
 public class MixinPersistentStateManager implements IMixinPersistentStateManager {
 
     @Override
-    public ForcedChunkState Iget() {
-        return ((PersistentStateManager)(Object)this).get(ForcedChunkState::fromNbt, "chunks");
+    public ForcedChunksSavedData Iget() {
+        return ((DimensionDataStorage)(Object)this).get(ForcedChunksSavedData::load, "chunks");
     }
 
 }

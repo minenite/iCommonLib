@@ -1,14 +1,14 @@
 package me.isaiah.common.cmixin;
 
 import me.isaiah.common.world.IWorld;
-import net.minecraft.item.map.MapState;
-import net.minecraft.util.collection.IndexedIterable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeSource;
-import net.minecraft.world.chunk.PalettedContainer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.IdMap;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.chunk.PalettedContainer;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public interface IMixinWorld {
 
@@ -21,12 +21,12 @@ public interface IMixinWorld {
      * @implNote 1.17+ - new BiomeArray(IndexedIterable, World, ChunkPos, BiomeSource)
      */
     // @Deprecated
-    public Object I_newBiomeArray(IndexedIterable<Biome> biomes, World world, ChunkPos chunkPos, BiomeSource biomeSource);
+    public Object I_newBiomeArray(IdMap<Biome> biomes, Level world, ChunkPos chunkPos, BiomeSource biomeSource);
     
     /**
      * 1.17/1.18
      */
-    public PalettedContainer<net.minecraft.block.BlockState> I_emptyBlockIDs();
+    public PalettedContainer<net.minecraft.world.level.block.state.BlockState> I_emptyBlockIDs();
 
     /**
      * <= 1.18.1: World.getBiomeForNoiseGen(int, int, int)
@@ -36,7 +36,7 @@ public interface IMixinWorld {
     
     /**
      */
-    public MapState IC$get_map_state(int id);
+    public MapItemSavedData IC$get_map_state(int id);
 
     /**
      */

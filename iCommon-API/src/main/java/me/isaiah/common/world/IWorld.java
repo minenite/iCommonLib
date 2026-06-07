@@ -1,8 +1,8 @@
 package me.isaiah.common.world;
 
 import me.isaiah.common.block.IBlockState;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 
 /**
  * iCommon API for Worlds
@@ -44,12 +44,12 @@ public interface IWorld {
     /**
      * Is this World "The End" Dimension
      */
-    public boolean isTheEnd(ServerWorld world);
+    public boolean isTheEnd(ServerLevel world);
     
     /**
      * Get the World's Spawn Point
      * 
-     * @see {@link net.minecraft.util.math.BlockPos}
+     * @see {@link net.minecraft.core.BlockPos}
      */
     public BlockPos getSpawnPoint();
     

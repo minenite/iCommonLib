@@ -2,12 +2,10 @@ package me.isaiah.common;
 
 import java.util.Collection;
 import java.util.Random;
-
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
 
 /**
  */
@@ -22,7 +20,7 @@ public interface LootTable {
     /**
      * Attempt to fill an inventory with this LootTable's loot.
      */
-    void fillInventory(@NotNull Inventory inventory, @Nullable Random random, @NotNull LootInfo context);
+    void fillInventory(@NotNull Container inventory, @Nullable Random random, @NotNull LootInfo context);
 
     /**
      */

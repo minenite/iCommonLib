@@ -5,20 +5,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import com.mojang.authlib.GameProfile;
 
 import me.isaiah.common.cmixin.IMixinPlayerManager;
-import net.minecraft.network.encryption.PlayerPublicKey;
-import net.minecraft.network.encryption.SignatureVerifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.network.ServerLoginNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 
-@Mixin(PlayerManager.class)
+@Mixin(PlayerList.class)
 public class MixinPlayerManager implements IMixinPlayerManager {
 
     @Override
-    public ServerPlayerEntity InewPlayer(MinecraftServer server, ServerWorld world, GameProfile profile) {	
-        return new ServerPlayerEntity(server, world, profile);
+    public ServerPlayer InewPlayer(MinecraftServer server, ServerLevel world, GameProfile profile) {	
+        return new ServerPlayer(server, world, profile);
     }
 
 }

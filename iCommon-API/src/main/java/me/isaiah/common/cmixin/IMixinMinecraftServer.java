@@ -1,24 +1,21 @@
 package me.isaiah.common.cmixin;
 
 import java.util.UUID;
-
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.Commands.CommandSelection;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import com.mojang.authlib.GameProfile;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.c2s.handshake.HandshakeC2SPacket;
-import net.minecraft.network.packet.s2c.play.EntityStatusEffectS2CPacket;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.CommandManager.RegistrationEnvironment;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.village.TradeOffer;
-//import net.minecraft.util.registry.DynamicRegistryManager.Impl;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
 
 public interface IMixinMinecraftServer {
 
@@ -33,7 +30,7 @@ public interface IMixinMinecraftServer {
      * @implNote 1.18 - createOverworldGenerator(DynamicRegistryManager, long)
      * @implNote 1.17 - createOverworldGenerator(Registry<Biome>, Registry<ChunkGeneratorSettings>, long)
      */
-    public NoiseChunkGenerator I_createOverworldGenerator();
+    public NoiseBasedChunkGenerator I_createOverworldGenerator();
 
     /**
      * The constructors for ChunkSection have changed
@@ -43,7 +40,7 @@ public interface IMixinMinecraftServer {
      * @implNote 1.17 - ChunkSection(int yOffset)
      * @implNote 1.18 - ChunkSection(int chunkPos, Registry<Biome> biomeRegistry)
      */
-    public ChunkSection newChunkSection(int yOffset);
+    public LevelChunkSection newChunkSection(int yOffset);
 
     /**
      * Retrieve UUID from a GameProfile
@@ -59,27 +56,27 @@ public interface IMixinMinecraftServer {
      * @implNote 1.18 - new CommandManager(RegistrationEnvironment)
      * @implNote 1.19 - new CommandManager(RegistrationEnvironment, CommandRegistryAccess)
      */
-    public CommandManager new_command_manager(RegistrationEnvironment env);
+    public Commands new_command_manager(CommandSelection env);
     
     /**
      */
-    public TradeOffer create_new_trade_offer(ItemStack result, int uses, int maxUses, boolean experienceReward, int experience, float priceMultiplier, int demand, int specialPrice);
+    public MerchantOffer create_new_trade_offer(ItemStack result, int uses, int maxUses, boolean experienceReward, int experience, float priceMultiplier, int demand, int specialPrice);
 
     /**
      */
-    public EntityStatusEffectS2CPacket new_status_effect_packet(int id, StatusEffectInstance effect, boolean bl);
+    public ClientboundUpdateMobEffectPacket new_status_effect_packet(int id, MobEffectInstance effect, boolean bl);
 
     /**
      */
-    public Text IC$from_json(String json); // Serialization
+    public Component IC$from_json(String json); // Serialization
     
     /**
      */
-    public String IC$to_json(Text text);
+    public String IC$to_json(Component text);
     
     /**
      */
-    public int IC$get_connection_state(HandshakeC2SPacket packet);
+    public int IC$get_connection_state(ClientIntentionPacket packet);
     
     /**
      */
@@ -87,5 +84,5 @@ public interface IMixinMinecraftServer {
 
     /**
      */
-    public BlockEntity IC$create_blockentity_from_nbt(BlockPos pos, BlockState state, NbtCompound nbt);
+    public BlockEntity IC$create_blockentity_from_nbt(BlockPos pos, BlockState state, CompoundTag nbt);
 }

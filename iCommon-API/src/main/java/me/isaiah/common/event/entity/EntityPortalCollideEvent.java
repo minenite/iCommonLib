@@ -2,10 +2,10 @@ package me.isaiah.common.event.entity;
 
 import me.isaiah.common.event.Cancelable;
 import me.isaiah.common.event.Event;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Represents an Entity walking into a Nether Portal
@@ -18,7 +18,7 @@ public class EntityPortalCollideEvent extends Event implements Cancelable {
 	private Entity entity;
 	private BlockPos pos;
 
-	public EntityPortalCollideEvent(BlockState state, World world, BlockPos pos, Entity entity) {
+	public EntityPortalCollideEvent(BlockState state, Level world, BlockPos pos, Entity entity) {
 		this.entity = entity;
 		this.pos = pos;
 	}

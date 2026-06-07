@@ -4,33 +4,33 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import me.isaiah.common.cmixin.IMixinBeaconBlockEntity;
-import net.minecraft.block.entity.BeaconBlockEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.registry.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 
 @Mixin(BeaconBlockEntity.class)
 public class MixinBeaconBlockEntity implements IMixinBeaconBlockEntity {
 
 	@Shadow
-	public StatusEffect primary;
+	public MobEffect primaryPower;
 	
 	@Shadow
-	public StatusEffect secondary;
+	public MobEffect secondaryPower;
 	
 	@Override
 	public void IC$set_primary_effect(int effectId) {
 		if (effectId == -99) {
-			this.primary = null;
+			this.primaryPower = null;
 		}
-		this.primary = Registries.STATUS_EFFECT.get(effectId);
+		this.primaryPower = BuiltInRegistries.MOB_EFFECT.byId(effectId);
 	}
 
 	@Override
 	public void IC$set_secondary_effect(int effectId) {
 		if (effectId == -99) {
-			this.secondary = null;
+			this.secondaryPower = null;
 		}
-		this.secondary = Registries.STATUS_EFFECT.get(effectId);
+		this.secondaryPower = BuiltInRegistries.MOB_EFFECT.byId(effectId);
 	}
 
 }

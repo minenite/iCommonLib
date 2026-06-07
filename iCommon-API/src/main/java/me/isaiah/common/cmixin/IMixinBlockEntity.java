@@ -1,26 +1,26 @@
 package me.isaiah.common.cmixin;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public interface IMixinBlockEntity {
 
-    public NbtCompound I_createNbtWithIdentifyingData();
+    public CompoundTag I_createNbtWithIdentifyingData();
 
     /**
      */
-    public void IC$add_bee_to_beehive(ServerWorld world, int rand);
+    public void IC$add_bee_to_beehive(ServerLevel world, int rand);
     
     /**
      */
-    public void IC$read_nbt(NbtCompound nbt);
+    public void IC$read_nbt(CompoundTag nbt);
     
     
     /**
      */
-    public BlockEntity IC$create_from_nbt(BlockPos pos, BlockState state, NbtCompound nbt);
+    public BlockEntity IC$create_from_nbt(BlockPos pos, BlockState state, CompoundTag nbt);
     
 }

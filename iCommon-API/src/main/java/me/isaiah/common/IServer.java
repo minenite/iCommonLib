@@ -6,11 +6,11 @@ import java.util.UUID;
 import com.mojang.authlib.GameProfile;
 
 import me.isaiah.common.world.IWorld;
-import net.minecraft.item.ItemStack;
-import net.minecraft.resource.ResourcePackProfile;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Identifier;
-import net.minecraft.village.TradeOffer;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.MerchantOffer;
 
 public interface IServer {
 
@@ -71,11 +71,11 @@ public interface IServer {
 
     /**
      */
-	TradeOffer create_trade_offer(ItemStack result, int uses, int maxUses, boolean experienceReward, int experience, float priceMultiplier, int demand, int specialPrice);
+	MerchantOffer create_trade_offer(ItemStack result, int uses, int maxUses, boolean experienceReward, int experience, float priceMultiplier, int demand, int specialPrice);
     
 	/**
 	 */
-	IDatapack get_datapack(ResourcePackProfile handler);
+	IDatapack get_datapack(Pack handler);
 
 	/**
 	 */

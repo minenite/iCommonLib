@@ -8,6 +8,167 @@ preprocess {
 }
 */
 
+repositories {
+    mavenCentral()  
+    maven {         
+        url = uri("https://pisaiah.com/maven-repo")
+    }
+}
+
+
+
+ext.createPreprocessor = { Project proj ->
+
+    def version = proj.hasProperty("targetVersion") ? proj.targetVersion : "mc1201"
+    def preprocessDir = proj.layout.buildDirectory.dir("preprocessed")
+
+	// def excluded = proj.hasProperty("excludeFiles") ? proj.excludedFiles : []
+
+    proj.tasks.register("preprocess") {
+        // def inputDir = proj.file("src/main/java")
+        def inputDir = proj.file(proj.ext.inputSourceDir ?: "src/main/java")
+        def excluded = proj.hasProperty("excludedFiles") ? proj.ext.excludedFiles : []
+		def outputDir = preprocessDir.get().asFile
+
+        inputs.dir(inputDir)
+        outputs.dir(outputDir)
+
+        doLast {
+            outputDir.deleteDir()
+            outputDir.mkdirs()
+
+            inputDir.eachFileRecurse { file ->
+                if (file.isFile() && file.name.endsWith(".java")) {
+				
+					def fname = proj.relativePath(file).replace(proj.relativePath(inputDir), inputDir.name).replace(File.separatorChar, '/' as char)
+					// println(fname);
+					// println(excluded);
+					
+					if (excluded.contains(fname)) {
+						println("Skipping from preprocessor: " + fname);
+						return // skip this file entirely
+					}
+				
+                    def lines = file.readLines()
+                    def out = new StringBuilder()
+
+                    boolean include = true
+                    boolean inBlock = false
+					boolean branchTaken = false
+
+                    lines.each { line ->
+						def line2 = line
+                        def trimmed = line.trim()
+						
+						if (trimmed.contains("ResourceLocation") && version.contains("1.21.11")) {
+									System.out.println(line)
+									line2 = line.replaceAll("ResourceLocation", "Identifier")
+									trimmed line2.trim()
+								}
+						
+
+						/*
+                        if (trimmed.startsWith("// #if")) {
+                            inBlock = true
+                            include = trimmed.contains(version)
+							branchTaken = include
+                        } else if (trimmed.startsWith("// #elif")) {
+                            if (inBlock) include = trimmed.contains(version)
+                        } else if (trimmed.startsWith("// #else")) {
+                            if (inBlock) include = true
+                        } else if (trimmed.startsWith("// #endif")) {
+                            inBlock = false
+                            include = true
+                        } else {
+                            if (include) out.append(line2).append("\n")
+                        }
+						*/
+					
+						
+						if (trimmed.startsWith("// #if")) {
+							inBlock = true
+							branchTaken = trimmed.contains(version)
+							include = branchTaken
+						} else if (trimmed.startsWith("// #elif")) {
+							if (inBlock && !branchTaken) {
+								branchTaken = trimmed.contains(version)
+								include = branchTaken
+							} else {
+								include = false
+							}
+						} else if (trimmed.startsWith("// #else")) {
+							if (inBlock && !branchTaken) {
+								include = true
+								branchTaken = true
+							} else {
+								include = false
+							}
+						} else if (trimmed.startsWith("// #endif")) {
+							inBlock = false
+							include = true
+							branchTaken = false
+						}
+
+						if (include) {
+						
+							if (branchTaken) {
+							
+								def cleaned = line
+								// Uncomment normal commented-out code
+								def t = cleaned.trim()
+								if (t.startsWith("//") && !t.startsWith("// #")) {
+									cleaned = cleaned.replaceFirst("//\\s?", "") 
+								}
+								out.append(cleaned).append("\n")
+							
+							} else {
+							
+								if (line2.contains("ResourceLocation")) {
+									System.out.println(line2)
+								}
+							
+								if (trimmed.contains("ResourceLocation") && version.contains("1.21.11")) {
+									out.append(line2.replaceAll("ResourceLocation", "Identifier")).append("\n")
+								} else {
+							
+								out.append(line2).append("\n")
+								}
+							}
+						}
+                    }
+
+                    // def outFile = new File(outputDir, file.relativeTo(inputDir).path)
+                    
+					def relative = proj.relativePath(file).replace(proj.relativePath(inputDir), "")
+					def outFile = new File(outputDir, relative)
+
+					
+					outFile.parentFile.mkdirs()
+                    outFile.text = out.toString()
+                }
+            }
+        }
+    }
+	
+	println("Version: " + version);
+	println("SRC:" + proj.sourceSets.main.java.srcDirs);
+
+	if (version.contains("mc261")) {
+		// Huh.
+		println("Version: 26");
+		proj.sourceSets.main.java.srcDirs = [ proj.relativePath('src/main/java'), preprocessDir.get().asFile ]
+	} else {
+		if (version.contains("mcCommon")) {
+			// no modify source sets
+		} else { 
+			proj.sourceSets.main.java.srcDirs = [ preprocessDir.get().asFile ]
+		}
+	}
+	
+	println("SRC:" + proj.sourceSets.main.java.srcDirs);
+    proj.tasks.compileJava.dependsOn proj.tasks.preprocess
+} as groovy.lang.Closure<org.gradle.api.Project>
+
 subprojects {
 
 	if (name == 'iCommon-preprocess') {
@@ -20,7 +181,7 @@ subprojects {
 
 	plugins.withId('fabric-loom', { _ -> 
 	
-		if (name != 'iCommon-API' && name != 'iCommon-Fabric-bundle') {
+		if (name != 'iCommon-API' && name != 'iCommon-API-yarn' && name != 'iCommon-Fabric-bundle') {
 			dependencies {
 				include(project(":iCommon-API-Configuration"))
 			}

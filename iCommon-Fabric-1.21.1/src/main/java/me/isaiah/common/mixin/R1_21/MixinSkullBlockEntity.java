@@ -5,20 +5,20 @@ import org.spongepowered.asm.mixin.Mixin;
 import com.mojang.authlib.GameProfile;
 
 import me.isaiah.common.cmixin.IMixinSkullBlockEntity;
-import net.minecraft.block.entity.SkullBlockEntity;
-import net.minecraft.component.type.ProfileComponent;
+import net.minecraft.world.item.component.ResolvableProfile;
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
 
 @Mixin(SkullBlockEntity.class)
 public class MixinSkullBlockEntity implements IMixinSkullBlockEntity {
 
 	@Override
 	public GameProfile IC$get_game_profile() {
-		return ((SkullBlockEntity)(Object)this).getOwner().comp_2413();
+		return ((SkullBlockEntity)(Object)this).getOwnerProfile().gameProfile();
 	}
 	
 	@Override
 	public void IC$set_game_profile(GameProfile profile) {
-		((SkullBlockEntity)(Object)this).setOwner(new ProfileComponent(profile));
+		((SkullBlockEntity)(Object)this).setOwner(new ResolvableProfile(profile));
 	}
 
 }

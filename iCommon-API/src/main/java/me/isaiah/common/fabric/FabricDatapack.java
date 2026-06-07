@@ -2,26 +2,26 @@ package me.isaiah.common.fabric;
 
 import me.isaiah.common.IDatapack;
 import me.isaiah.common.cmixin.IMixinResourcePackProfile;
-import net.minecraft.resource.ResourcePackProfile;
-import net.minecraft.resource.metadata.PackResourceMetadata;
+import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
+import net.minecraft.server.packs.repository.Pack;
 
 public class FabricDatapack implements IDatapack {
 
-    private ResourcePackProfile handle;
-    private PackResourceMetadata resourcePackInfo;
+    private Pack handle;
+    private PackMetadataSection resourcePackInfo;
 
-    public FabricDatapack(ResourcePackProfile handler) {
+    public FabricDatapack(Pack handler) {
         this.handle = handler;
 
         IMixinResourcePackProfile im = ((IMixinResourcePackProfile)(Object)handle);
-        PackResourceMetadata data = im.IC$open_and_parse_metadata();
+        PackMetadataSection data = im.IC$open_and_parse_metadata();
         if (null != data) {
         	resourcePackInfo = data;
         }
     }
     
     @Override
-    public PackResourceMetadata get_metadata() {
+    public PackMetadataSection get_metadata() {
     	if (null == resourcePackInfo) {
     		return null;
     	}
@@ -29,7 +29,7 @@ public class FabricDatapack implements IDatapack {
     }
 	
 	@Override
-	public ResourcePackProfile get_minecraft() {
+	public Pack get_minecraft() {
 		return handle;
 	}
 

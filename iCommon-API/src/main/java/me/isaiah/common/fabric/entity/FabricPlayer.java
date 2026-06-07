@@ -1,13 +1,13 @@
 package me.isaiah.common.fabric.entity;
 
 import me.isaiah.common.entity.IPlayer;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 
 public class FabricPlayer extends FabricAliveEntity implements IPlayer {
 
     public FabricPlayer(Entity mc) {
-        super((PlayerEntity)mc);
+        super((Player)mc);
     }
 
     @Override
@@ -16,8 +16,8 @@ public class FabricPlayer extends FabricAliveEntity implements IPlayer {
     }
 
     @Override
-    public PlayerEntity getMC() {
-        return (PlayerEntity) mc;
+    public Player getMC() {
+        return (Player) mc;
     }
 
     @Override

@@ -8,10 +8,10 @@ import me.isaiah.common.entity.EntityType;
 import me.isaiah.common.entity.IEntity;
 import me.isaiah.common.entity.IRemoveReason;
 import me.isaiah.common.fabric.FabricServer;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
-import net.minecraft.world.World;
 import me.isaiah.common.world.IWorld;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 
 public class FabricEntity implements IEntity {
 
@@ -37,7 +37,7 @@ public class FabricEntity implements IEntity {
     
     @Override
     public IWorld getIWorld() {
-    	World world = this.imixin().ic$getWorld();
+    	Level world = this.imixin().ic$getWorld();
     	return FabricServer.getInstance().getIWorldForMinecraftWorld(world);
     }
  
@@ -50,7 +50,7 @@ public class FabricEntity implements IEntity {
     @Override
     public void setDisplayedName(String str) {
         getMC().setCustomNameVisible(true);
-        getMC().setCustomName(Text.of(str));
+        getMC().setCustomName(Component.nullToEmpty(str));
     }
 
     @Override
@@ -65,7 +65,7 @@ public class FabricEntity implements IEntity {
 
     @Override
     public void message(String msg) {
-        ((IMixinEntity)mc).IsendText(Text.of(msg), UUID.randomUUID());
+        ((IMixinEntity)mc).IsendText(Component.nullToEmpty(msg), UUID.randomUUID());
     }
 
     @Override
@@ -75,7 +75,7 @@ public class FabricEntity implements IEntity {
 
     @Override
     public void collidesWith(IEntity e) {
-        getMC().collidesWith((Entity)e.getMC());
+        getMC().canCollideWith((Entity)e.getMC());
     }
 
     @Override
@@ -88,7 +88,7 @@ public class FabricEntity implements IEntity {
     @Override
     public void teleport(double x, double y, double z, float yaw, float pitch) {
         this.teleport(x, y, z);
-        getMC().setBodyYaw(yaw);
+        getMC().setYBodyRot(yaw);
         // TODO 1.17 getMC().pitch = pitch;
     }
     

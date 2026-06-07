@@ -3,14 +3,14 @@ package me.isaiah.common.mixin.R1_20;
 import org.spongepowered.asm.mixin.Mixin;
 
 import me.isaiah.common.cmixin.IMixinTameableEntity;
-import net.minecraft.entity.passive.TameableEntity;
+import net.minecraft.world.entity.TamableAnimal;
 
-@Mixin(TameableEntity.class)
+@Mixin(TamableAnimal.class)
 public class MixinTameableEntity implements IMixinTameableEntity {
 
 	@Override
 	public void IC$set_tamed(boolean tamed, boolean update_attributes) {
-		((TameableEntity)(Object)this).setTamed(tamed);
+		((TamableAnimal)(Object)this).setTame(tamed);
 	}
 
 }

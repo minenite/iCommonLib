@@ -1,14 +1,14 @@
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-    id ("fabric-loom")
+    id ("fabric-loom") version "1.15-SNAPSHOT"
     id ("java-library")
     id ("maven-publish")
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 base {
@@ -27,18 +27,18 @@ tasks.withType<Jar> { duplicatesStrategy = DuplicatesStrategy.INCLUDE }
 
 dependencies {
 	// 1.18.2
-    minecraft("com.mojang:minecraft:1.18.2") 
-    mappings("net.fabricmc:yarn:1.18.2+build.2:v2")
+    minecraft("com.mojang:minecraft:1.21.11") 
+    mappings(loom.officialMojangMappings())
     modImplementation("net.fabricmc:fabric-loader:" + project.property("loader_version"))
 	
 	setOf(
 		"fabric-api-base",
-		"fabric-command-api-v1",
+		// "fabric-command-api-v1",
 		"fabric-lifecycle-events-v1",
 		"fabric-networking-api-v1"
 	).forEach {
 		// Add each module as a dependency
-		modImplementation(fabricApi.module(it, "0.77.0+1.18.2"))
+		modImplementation(fabricApi.module(it, "0.138.3+1.21.11"))
 	}
 }
 

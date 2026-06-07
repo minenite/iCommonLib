@@ -3,19 +3,18 @@ package me.isaiah.common.fabric.entity;
 import me.isaiah.common.cmixin.IMixinEntity;
 import me.isaiah.common.entity.IEntity;
 import me.isaiah.common.entity.IPrimedTnt;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.TntEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.PrimedTnt;
 
 public class FabricPrimedTnt extends FabricEntity implements IPrimedTnt {
 
     public FabricPrimedTnt(Entity mc) {
-        super((TntEntity)mc);
+        super((PrimedTnt)mc);
     }
 
     @Override
-    public TntEntity getMC() {
-        return (TntEntity) mc;
+    public PrimedTnt getMC() {
+        return (PrimedTnt) mc;
     }
 
     @Override

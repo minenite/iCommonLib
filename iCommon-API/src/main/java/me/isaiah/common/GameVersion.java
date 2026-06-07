@@ -1,8 +1,7 @@
 package me.isaiah.common;
 
 import com.google.gson.JsonObject;
-
-import net.minecraft.util.JsonHelper;
+import net.minecraft.util.GsonHelper;
 
 public class GameVersion {
     
@@ -14,13 +13,13 @@ public class GameVersion {
     public GameVersion(JsonObject jsonObject) {
 		String relTarget = "";
         try {
-			relTarget = JsonHelper.getString(jsonObject, "release_target");
+			relTarget = GsonHelper.getAsString(jsonObject, "release_target");
 		} catch (Exception e) {
 			// Why would mojang decide to break gameversion again?
-			relTarget = JsonHelper.getString(jsonObject, "id");
+			relTarget = GsonHelper.getAsString(jsonObject, "id");
 		}
 		this.releaseTarget = relTarget;
-        this.protocolVersion = JsonHelper.getInt(jsonObject, "protocol_version");
+        this.protocolVersion = GsonHelper.getAsInt(jsonObject, "protocol_version");
     }
 
     /**

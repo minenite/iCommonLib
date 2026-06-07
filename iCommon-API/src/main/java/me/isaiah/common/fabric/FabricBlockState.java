@@ -2,7 +2,7 @@ package me.isaiah.common.fabric;
 
 import me.isaiah.common.block.IBlockState;
 import me.isaiah.common.world.IWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 public class FabricBlockState implements IBlockState {
 

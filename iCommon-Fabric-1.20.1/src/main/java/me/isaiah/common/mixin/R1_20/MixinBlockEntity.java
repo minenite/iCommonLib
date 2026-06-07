@@ -10,35 +10,35 @@ import me.isaiah.common.cmixin.IMixinBlockEntity;
 import me.isaiah.common.event.EventRegistery;
 import me.isaiah.common.event.block.BlockEntityWriteNbtEvent;
 import me.isaiah.common.event.entity.BlockEntityLoadEvent;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(BlockEntity.class)
 public class MixinBlockEntity implements IMixinBlockEntity {
 
-    @Inject(at = @At("TAIL"), method = "readNbt")
-    public void loadEnd(NbtCompound tag, CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "load")
+    public void loadEnd(CompoundTag tag, CallbackInfo ci) {
         EventRegistery.invoke(BlockEntityLoadEvent.class, 
                 new BlockEntityLoadEvent(tag, (BlockEntity)(Object)this));
     }
 
-    @Inject(at = @At("RETURN"), method = "writeIdentifyingData")
-    public void saveEnd(NbtCompound tag, CallbackInfo callback) {
+    @Inject(at = @At("RETURN"), method = "saveMetadata")
+    public void saveEnd(CompoundTag tag, CallbackInfo callback) {
         EventRegistery.invoke(BlockEntityWriteNbtEvent.class, 
                 new BlockEntityWriteNbtEvent(tag, (BlockEntity)(Object)this));
     }
 
     @Override
-    public NbtCompound I_createNbtWithIdentifyingData() {
-        return ((BlockEntity)(Object)this).createNbtWithIdentifyingData();
+    public CompoundTag I_createNbtWithIdentifyingData() {
+        return ((BlockEntity)(Object)this).saveWithFullMetadata();
     }
     
     
 	@Override
-	public void IC$add_bee_to_beehive(ServerWorld world, int rand) {
+	public void IC$add_bee_to_beehive(ServerLevel world, int rand) {
 		BlockEntity tileentity = (BlockEntity) (Object) this;
 		/*if (tileentity instanceof BeehiveBlockEntity) {
             BeehiveBlockEntity beehive = (BeehiveBlockEntity) tileentity;
@@ -54,14 +54,14 @@ public class MixinBlockEntity implements IMixinBlockEntity {
 	}
 	
 	@Override
-	public void IC$read_nbt(NbtCompound nbt) {
+	public void IC$read_nbt(CompoundTag nbt) {
 		BlockEntity be = (BlockEntity) (Object) this;
-		be.readNbt(nbt);
+		be.load(nbt);
 	}
 	
 	@Override
-	public BlockEntity IC$create_from_nbt(BlockPos pos, BlockState state, NbtCompound nbt) {
-		return BlockEntity.createFromNbt(pos, state, nbt);
+	public BlockEntity IC$create_from_nbt(BlockPos pos, BlockState state, CompoundTag nbt) {
+		return BlockEntity.loadStatic(pos, state, nbt);
 	}
 
 }

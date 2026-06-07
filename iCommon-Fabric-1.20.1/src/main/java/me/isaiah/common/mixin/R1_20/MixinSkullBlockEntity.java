@@ -5,14 +5,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import com.mojang.authlib.GameProfile;
 
 import me.isaiah.common.cmixin.IMixinSkullBlockEntity;
-import net.minecraft.block.entity.SkullBlockEntity;
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
 
 @Mixin(SkullBlockEntity.class)
 public class MixinSkullBlockEntity implements IMixinSkullBlockEntity {
 
 	@Override
 	public GameProfile IC$get_game_profile() {
-		return ((SkullBlockEntity)(Object)this).getOwner();
+		return ((SkullBlockEntity)(Object)this).getOwnerProfile();
 	}
 
 	@Override

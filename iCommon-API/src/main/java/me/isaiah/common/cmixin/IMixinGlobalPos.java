@@ -1,6 +1,6 @@
 package me.isaiah.common.cmixin;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 public interface IMixinGlobalPos {
 

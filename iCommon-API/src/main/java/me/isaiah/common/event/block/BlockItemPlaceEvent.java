@@ -6,14 +6,14 @@ import me.isaiah.common.entity.IPlayer;
 import me.isaiah.common.event.Cancelable;
 import me.isaiah.common.event.Event;
 import me.isaiah.common.world.IWorld;
-import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 
 public class BlockItemPlaceEvent extends Event implements Cancelable {
 
     private boolean no;
-    private ItemPlacementContext context;
+    private BlockPlaceContext context;
 
-    public BlockItemPlaceEvent(ItemPlacementContext context) {
+    public BlockItemPlaceEvent(BlockPlaceContext context) {
         this.no = false;
         this.context = context;
     }
@@ -33,10 +33,10 @@ public class BlockItemPlaceEvent extends Event implements Cancelable {
     }
 
     public IWorld getWorld() {
-        return ((IMixinWorld)context.getWorld()).icommon();
+        return ((IMixinWorld)context.getLevel()).icommon();
     }
 
-    public ItemPlacementContext mc() {
+    public BlockPlaceContext mc() {
         return context;
     }
 

@@ -9,21 +9,21 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import me.isaiah.common.ICommonMod;
 import me.isaiah.common.cmixin.IMixinItemStack;
-import net.minecraft.command.argument.ItemStringReader;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.util.Hand;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.item.ItemParser;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.alchemy.PotionContents;
 
 @Mixin(ItemStack.class)
 public class MixinItemStack implements IMixinItemStack {
 
 	@Override
-	public void IC$damage(int amount, LivingEntity entity, Hand hand) {
-        ((ItemStack)(Object)this).damage(1, entity, LivingEntity.getSlotForHand(hand));
+	public void IC$damage(int amount, LivingEntity entity, InteractionHand hand) {
+        ((ItemStack)(Object)this).hurtAndBreak(1, entity, LivingEntity.getSlotForHand(hand));
 	}
 
 	
@@ -32,11 +32,11 @@ public class MixinItemStack implements IMixinItemStack {
         try {
         	//((ItemStack)(Object)this).setNbt((NbtCompound) StringNbtReader.parse(arguments));
         	
-        	((ItemStack)(Object)this).applyUnvalidatedChanges(
-        			new ItemStringReader(
-        					CommandManager.createRegistryAccess(
-        							ICommonMod.getIServer().getMinecraft().getRegistryManager())
-        			).consume(new StringReader(arguments)).comp_2439());
+        	((ItemStack)(Object)this).applyComponents(
+        			new ItemParser(
+        					Commands.createValidationContext(
+        							ICommonMod.getIServer().getMinecraft().registryAccess())
+        			).parse(new StringReader(arguments)).components());
         	
         } catch (CommandSyntaxException ex) {
             ICommonMod.LOGGER.error("CommandSyntaxException while modifying arguments", ex);
@@ -44,8 +44,8 @@ public class MixinItemStack implements IMixinItemStack {
 	}
 	
 	@Override
-	public List<StatusEffectInstance> IC$get_potion_status_effects() {
-		return ((ItemStack) (Object) this).getOrDefault(DataComponentTypes.POTION_CONTENTS, PotionContentsComponent.DEFAULT).comp_2380();
+	public List<MobEffectInstance> IC$get_potion_status_effects() {
+		return ((ItemStack) (Object) this).getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).customEffects();
 	}
 	
 }

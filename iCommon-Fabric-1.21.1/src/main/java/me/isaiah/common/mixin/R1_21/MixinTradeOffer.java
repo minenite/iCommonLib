@@ -6,47 +6,47 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import me.isaiah.common.cmixin.IMixinTradeOffer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.predicate.ComponentPredicate;
-import net.minecraft.village.TradeOffer;
-import net.minecraft.village.TradedItem;
+import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.ItemCost;
+import net.minecraft.world.item.trading.MerchantOffer;
 
-@Mixin(TradeOffer.class)
+@Mixin(MerchantOffer.class)
 public class MixinTradeOffer implements IMixinTradeOffer {
 
 	@Shadow
-	public TradedItem firstBuyItem;
+	public ItemCost baseCostA;
 
 	@Shadow
-	public Optional<TradedItem> secondBuyItem;
+	public Optional<ItemCost> costB;
 	
 	@Override
 	public ItemStack IC$get_first_buy_itemstack() {
-		TradeOffer ofr = (TradeOffer) (Object) this;
-		return ofr.getFirstBuyItem().comp_2427();
+		MerchantOffer ofr = (MerchantOffer) (Object) this;
+		return ofr.getItemCostA().itemStack();
 	}
 
 	@Override
 	public ItemStack IC$get_second_buy_itemstack() {
-		TradeOffer ofr = (TradeOffer) (Object) this;
-		Optional<TradedItem> opt = ofr.getSecondBuyItem();
+		MerchantOffer ofr = (MerchantOffer) (Object) this;
+		Optional<ItemCost> opt = ofr.getItemCostB();
 		
 		if (!opt.isPresent()) {
 			return null;
 		}
 
-		return opt.get().comp_2427();
+		return opt.get().itemStack();
 	}
 	
 	@Override
 	public void IC$set_first_buy_itemstack(ItemStack stack) {
-        this.firstBuyItem = new TradedItem(stack.getRegistryEntry(), stack.getCount(), ComponentPredicate.of(stack.getComponents()), stack);
+        this.baseCostA = new ItemCost(stack.getItemHolder(), stack.getCount(), DataComponentPredicate.allOf(stack.getComponents()), stack);
 
 	}
 
 	@Override
 	public void IC$set_second_buy_itemstack(ItemStack stack) {
-        this.secondBuyItem = Optional.of(new TradedItem(stack.getRegistryEntry(), stack.getCount(), ComponentPredicate.of(stack.getComponents()), stack));
+        this.costB = Optional.of(new ItemCost(stack.getItemHolder(), stack.getCount(), DataComponentPredicate.allOf(stack.getComponents()), stack));
 
 	}
 

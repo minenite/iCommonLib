@@ -14,14 +14,14 @@ import me.isaiah.common.IServer;
 import me.isaiah.common.Side;
 import me.isaiah.common.cmixin.IMixinMinecraftServer;
 import me.isaiah.common.world.IWorld;
-import net.minecraft.MinecraftVersion;
-import net.minecraft.item.ItemStack;
-import net.minecraft.resource.ResourcePackProfile;
+import net.minecraft.DetectedVersion;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
-import net.minecraft.village.TradeOffer;
-import net.minecraft.world.World;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.level.Level;
 
 public class FabricServer implements IServer {
 
@@ -47,13 +47,13 @@ public class FabricServer implements IServer {
         worldsMap.put(worldId.toString(), icommon);
     }
     
-    public IWorld getIWorldForMinecraftWorld(World world) {
-    	return worldsMap.get(world.getRegistryKey().getValue().toString());
+    public IWorld getIWorldForMinecraftWorld(Level world) {
+    	return worldsMap.get(world.dimension().identifier().toString());
     }
 
     @Override
     public String getMinecraftVersion() {
-        return mc.getVersion();
+        return mc.getServerVersion();
     }
 
     @Override
@@ -81,10 +81,10 @@ public class FabricServer implements IServer {
     /*
      */
     public static GameVersion create() {
-        try (InputStream inputStream = MinecraftVersion.class.getResourceAsStream("/version.json");){
+        try (InputStream inputStream = DetectedVersion.class.getResourceAsStream("/version.json");){
             if (inputStream == null) return null;
             try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);){
-                return new GameVersion(JsonHelper.deserialize(inputStreamReader));
+                return new GameVersion(GsonHelper.parse(inputStreamReader));
             }
         } catch (Exception exception) {
             throw new IllegalStateException("Bad version info", exception);
@@ -99,12 +99,12 @@ public class FabricServer implements IServer {
     @Override
     @Deprecated
     public Side getSide() {
-        return mc.isDedicated() ? Side.SERVER : Side.CLIENT;
+        return mc.isDedicatedServer() ? Side.SERVER : Side.CLIENT;
     }
     
     @Override
     public boolean isDedicated() {
-    	return mc.isDedicated();
+    	return mc.isDedicatedServer();
     }
 
     @Override
@@ -124,12 +124,12 @@ public class FabricServer implements IServer {
 	 * @see {@link IMixinMinecraftServer.create_new_trade_offer}
 	 */
 	@Override
-	public TradeOffer create_trade_offer(ItemStack result, int uses, int maxUses, boolean experienceReward, int experience, float priceMultiplier, int demand, int specialPrice) {
+	public MerchantOffer create_trade_offer(ItemStack result, int uses, int maxUses, boolean experienceReward, int experience, float priceMultiplier, int demand, int specialPrice) {
 		return ((IMixinMinecraftServer)mc).create_new_trade_offer(result, uses, maxUses, experienceReward, experience, priceMultiplier, demand, specialPrice);
 	}
 
 	@Override
-	public IDatapack get_datapack(ResourcePackProfile handler) {
+	public IDatapack get_datapack(Pack handler) {
 		return new FabricDatapack(handler);
 	}
 

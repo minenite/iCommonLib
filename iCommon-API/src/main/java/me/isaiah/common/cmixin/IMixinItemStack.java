@@ -1,10 +1,9 @@
 package me.isaiah.common.cmixin;
 
 import java.util.List;
-
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.util.Hand;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 
 /**
  */
@@ -12,7 +11,7 @@ public interface IMixinItemStack {
 
 	/**
 	 */
-	void IC$damage(int amount, LivingEntity entity, Hand hand);
+	void IC$damage(int amount, LivingEntity entity, InteractionHand hand);
 	
 	/**
 	 */
@@ -20,6 +19,6 @@ public interface IMixinItemStack {
 	
 	/**
 	 */
-	public List<StatusEffectInstance> IC$get_potion_status_effects();
+	public List<MobEffectInstance> IC$get_potion_status_effects();
 
 }

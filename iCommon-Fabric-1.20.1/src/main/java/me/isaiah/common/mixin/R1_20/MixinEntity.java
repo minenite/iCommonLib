@@ -9,14 +9,14 @@ import me.isaiah.common.ICommonMod;
 import me.isaiah.common.cmixin.IMixinEntity;
 import me.isaiah.common.entity.IEntity;
 import me.isaiah.common.entity.IRemoveReason;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.world.World;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 
 @Mixin(Entity.class)
 public class MixinEntity implements IMixinEntity {
@@ -25,7 +25,7 @@ public class MixinEntity implements IMixinEntity {
     public void Iremove(IRemoveReason r) {
         switch (r) {
             case DIMENSION_CHANGE:
-                removeFromDimension();
+                removeAfterChangingDimensions();
                 break;
             case DISCARDED:
                 discard();
@@ -49,11 +49,11 @@ public class MixinEntity implements IMixinEntity {
 
     @Shadow public void kill()  {} // Dimension change
     @Shadow public void discard() {} // Discard
-    @Shadow public void removeFromDimension() {} // Kill
+    @Shadow public void removeAfterChangingDimensions() {} // Kill
 
     @Override
-    public void IsendText(Text text, UUID id) {
-        IgetMCEntity().sendMessage(text);
+    public void IsendText(Component text, UUID id) {
+        IgetMCEntity().sendSystemMessage(text);
     }
 
     @Override
@@ -67,65 +67,65 @@ public class MixinEntity implements IMixinEntity {
     }
     
 	@Override
-	public boolean IC$has_status_effect(StatusEffect effect) {
+	public boolean IC$has_status_effect(MobEffect effect) {
 		Entity thiz = (Entity) (Object) this;
 		if (!(thiz instanceof LivingEntity)) {
 			ICommonMod.LOGGER.info("ERROR: Entity is not living enitity");
 			return false;
 		}
 		LivingEntity entity = (LivingEntity) (Object) this;
-        return entity.hasStatusEffect(effect);
+        return entity.hasEffect(effect);
 	}
 	
 	@Override
-	public void IC$add_status_effect(StatusEffect effect, int duration, int amp, boolean ambient, boolean particles) {
+	public void IC$add_status_effect(MobEffect effect, int duration, int amp, boolean ambient, boolean particles) {
 		Entity thiz = (Entity) (Object) this;
 		if (!(thiz instanceof LivingEntity)) {
 			ICommonMod.LOGGER.info("ERROR: Entity is not living enitity");
 			return;
 		}
 		LivingEntity entity = (LivingEntity) thiz;
-        entity.addStatusEffect(new StatusEffectInstance(effect, duration, amp, ambient, particles));
+        entity.addEffect(new MobEffectInstance(effect, duration, amp, ambient, particles));
 	}
 	
 	@Override
-	public void IC$remove_status_effect(StatusEffect effect) {
+	public void IC$remove_status_effect(MobEffect effect) {
 		Entity thiz = (Entity) (Object) this;
 		if (!(thiz instanceof LivingEntity)) {
 			ICommonMod.LOGGER.info("ERROR: Entity is not living enitity");
 			return;
 		}
 		LivingEntity entity = (LivingEntity) thiz;
-        entity.removeStatusEffect(effect);
+        entity.removeEffect(effect);
 	}
 	
 	@Override
-	public StatusEffectInstance IC$get_status_effect(int typeId) {
+	public MobEffectInstance IC$get_status_effect(int typeId) {
 		Entity thiz = (Entity) (Object) this;
 		if (!(thiz instanceof LivingEntity)) {
 			ICommonMod.LOGGER.info("ERROR: Entity is not living enitity");
 			return null;
 		}
 		LivingEntity entity = (LivingEntity) thiz;
-		StatusEffect effect = Registries.STATUS_EFFECT.get(typeId);
-		StatusEffectInstance handle = entity.getStatusEffect(effect);
+		MobEffect effect = BuiltInRegistries.MOB_EFFECT.byId(typeId);
+		MobEffectInstance handle = entity.getEffect(effect);
 		return handle;
 	}
 
 	@Override
-	public int IC$get_status_effect_id(StatusEffectInstance handle) {
-		StatusEffect effect = handle.getEffectType();
-		return Registries.STATUS_EFFECT.getRawId(effect);
+	public int IC$get_status_effect_id(MobEffectInstance handle) {
+		MobEffect effect = handle.getEffect();
+		return BuiltInRegistries.MOB_EFFECT.getId(effect);
 	}
 
 	@Override
-	public void IC$teleport(ServerWorld world, double x, double y, double z) {
-		((Entity) (Object) this).teleport(x, y, z);
+	public void IC$teleport(ServerLevel world, double x, double y, double z) {
+		((Entity) (Object) this).teleportToWithTicket(x, y, z);
 	}
 
 	@Override
-	public World ic$getWorld() {
-		return ((Entity) (Object) this).getWorld();
+	public Level ic$getWorld() {
+		return ((Entity) (Object) this).level();
 	}
 
 }

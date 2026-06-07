@@ -10,80 +10,80 @@ import com.mojang.authlib.GameProfile;
 import me.isaiah.common.ConnectionState;
 import me.isaiah.common.ICommonMod;
 import me.isaiah.common.cmixin.IMixinMinecraftServer;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.NetworkState;
-import net.minecraft.network.packet.c2s.handshake.HandshakeC2SPacket;
-import net.minecraft.network.packet.s2c.play.EntityStatusEffectS2CPacket;
-import net.minecraft.registry.BuiltinRegistries;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.Commands.CommandSelection;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.registries.VanillaRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.CommandManager.RegistrationEnvironment;
-import net.minecraft.server.dedicated.MinecraftDedicatedServer;
-import net.minecraft.structure.StructureSet;
-import net.minecraft.text.Text;
-import net.minecraft.util.Uuids;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.noise.DoublePerlinNoiseSampler;
-import net.minecraft.village.TradeOffer;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeSource;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
-import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
+import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
-@Mixin(MinecraftDedicatedServer.class)
+@Mixin(DedicatedServer.class)
 public class MixinMinecraftServer implements IMixinMinecraftServer {
 
     // @Override
-    public NoiseChunkGenerator I_createOverworldGenerator() {
+    public NoiseBasedChunkGenerator I_createOverworldGenerator() {
         MinecraftServer mc = ICommonMod.getIServer().getMinecraft();
 
-        return createOverworldGenerator(mc.getRegistryManager(), (new Random()).nextLong());
+        return createOverworldGenerator(mc.registryAccess(), (new Random()).nextLong());
     }
 
     // @Override
-    public ChunkSection newChunkSection(int pos) {
+    public LevelChunkSection newChunkSection(int pos) {
         MinecraftServer mc = ICommonMod.getIServer().getMinecraft();
-        return new ChunkSection(mc.getRegistryManager().get(RegistryKeys.BIOME));
+        return new LevelChunkSection(mc.registryAccess().registryOrThrow(Registries.BIOME));
     }
     
-    private static NoiseChunkGenerator createOverworldGenerator(DynamicRegistryManager registryManager, long seed) {
+    private static NoiseBasedChunkGenerator createOverworldGenerator(RegistryAccess registryManager, long seed) {
         return createOverworldGenerator(registryManager, seed, true);
     }
 
-    private static NoiseChunkGenerator createOverworldGenerator(DynamicRegistryManager registryManager, long seed, boolean flag) {
-        return createGenerator(registryManager, seed, ChunkGeneratorSettings.OVERWORLD, flag);
+    private static NoiseBasedChunkGenerator createOverworldGenerator(RegistryAccess registryManager, long seed, boolean flag) {
+        return createGenerator(registryManager, seed, NoiseGeneratorSettings.OVERWORLD, flag);
     }
 
-    private static NoiseChunkGenerator createGenerator(DynamicRegistryManager registryManager, long seed, RegistryKey<ChunkGeneratorSettings> settings) {
+    private static NoiseBasedChunkGenerator createGenerator(RegistryAccess registryManager, long seed, ResourceKey<NoiseGeneratorSettings> settings) {
         return createGenerator(registryManager, seed, settings, true);
     }
     
-    private static NoiseChunkGenerator createGenerator(DynamicRegistryManager registryManager, long seed, RegistryKey<ChunkGeneratorSettings> settings, boolean flag) {
+    private static NoiseBasedChunkGenerator createGenerator(RegistryAccess registryManager, long seed, ResourceKey<NoiseGeneratorSettings> settings, boolean flag) {
         
-		Registry<Biome> iregistry = registryManager.get(RegistryKeys.BIOME);
+		Registry<Biome> iregistry = registryManager.registryOrThrow(Registries.BIOME);
 		
 		//RegistryKeys.noise
 		
-        Registry<StructureSet> iregistry1 = registryManager.get(RegistryKeys.STRUCTURE_SET);
-        Registry<ChunkGeneratorSettings> iregistry2 = registryManager.get(RegistryKeys.CHUNK_GENERATOR_SETTINGS);
-        Registry<DoublePerlinNoiseSampler.NoiseParameters> iregistry3 = registryManager.get(RegistryKeys.NOISE_PARAMETERS);
+        Registry<StructureSet> iregistry1 = registryManager.registryOrThrow(Registries.STRUCTURE_SET);
+        Registry<NoiseGeneratorSettings> iregistry2 = registryManager.registryOrThrow(Registries.NOISE_SETTINGS);
+        Registry<NormalNoise.NoiseParameters> iregistry3 = registryManager.registryOrThrow(Registries.NOISE);
         
         //BiomeSource bs = (BiomeSource)MultiNoiseBiomeSource.Preset.OVERWORLD.getBiomeSource(iregistry, flag);
 
         MinecraftServer mc = ICommonMod.getIServer().getMinecraft();
 
-        BiomeSource bs = mc.getWorld(World.OVERWORLD).getChunkManager().getChunkGenerator().getBiomeSource();
+        BiomeSource bs = mc.getLevel(Level.OVERWORLD).getChunkSource().getGenerator().getBiomeSource();
         
        // new NoiseChunkGenerator(bs, null);
         
@@ -95,24 +95,24 @@ public class MixinMinecraftServer implements IMixinMinecraftServer {
 
 	// @Override
 	public UUID get_uuid_from_profile(GameProfile profile) {
-		return Uuids.getUuidFromProfile(profile);
+		return UUIDUtil.getOrCreatePlayerUUID(profile);
 	}
 
 	// @Override
 	// TODO: currently not used in Cardboard
-	public CommandManager new_command_manager(RegistrationEnvironment env) {
-		MinecraftDedicatedServer mc = (MinecraftDedicatedServer) (Object) this;
+	public Commands new_command_manager(CommandSelection env) {
+		DedicatedServer mc = (DedicatedServer) (Object) this;
 
-		CommandRegistryAccess ac = CommandManager.createRegistryAccess(BuiltinRegistries.createWrapperLookup());
-		return new CommandManager(env, ac);
+		CommandBuildContext ac = Commands.createValidationContext(VanillaRegistries.createLookup());
+		return new Commands(env, ac);
 	}
 	
 	@Override
-	public TradeOffer create_new_trade_offer(ItemStack result, int uses, int maxUses, boolean experienceReward,
+	public MerchantOffer create_new_trade_offer(ItemStack result, int uses, int maxUses, boolean experienceReward,
 			int experience, float priceMultiplier, int demand, int specialPrice) {
-		return new net.minecraft.village.TradeOffer(
-        		net.minecraft.item.ItemStack.EMPTY,
-        		net.minecraft.item.ItemStack.EMPTY,
+		return new net.minecraft.world.item.trading.MerchantOffer(
+        		net.minecraft.world.item.ItemStack.EMPTY,
+        		net.minecraft.world.item.ItemStack.EMPTY,
                 result,
                 uses,
                 maxUses,
@@ -121,23 +121,23 @@ public class MixinMinecraftServer implements IMixinMinecraftServer {
 	}
 
 	@Override
-	public EntityStatusEffectS2CPacket new_status_effect_packet(int id, StatusEffectInstance effect, boolean bl) {
-		return new EntityStatusEffectS2CPacket(id, effect);
+	public ClientboundUpdateMobEffectPacket new_status_effect_packet(int id, MobEffectInstance effect, boolean bl) {
+		return new ClientboundUpdateMobEffectPacket(id, effect);
 	}
 	
 	@Override
-	public Text IC$from_json(String json) {
-		return Text.Serializer.fromJson(json);
+	public Component IC$from_json(String json) {
+		return Component.Serializer.fromJson(json);
 	}
 
 	@Override
-	public String IC$to_json(Text text) {
-		return Text.Serializer.toJson(text);
+	public String IC$to_json(Component text) {
+		return Component.Serializer.toJson(text);
 	}
 	
 	@Override
-	public int IC$get_connection_state(HandshakeC2SPacket packet) {
-		NetworkState state = packet.getIntendedState();
+	public int IC$get_connection_state(ClientIntentionPacket packet) {
+		ConnectionProtocol state = packet.getIntention();
 		switch (state) {
 			case HANDSHAKING:
 				return ConnectionState.HANDSHAKING;
@@ -154,8 +154,8 @@ public class MixinMinecraftServer implements IMixinMinecraftServer {
 	}
 	
 	@Override
-	public BlockEntity IC$create_blockentity_from_nbt(BlockPos pos, BlockState state, NbtCompound nbt) {
-		return BlockEntity.createFromNbt(pos, state, nbt);
+	public BlockEntity IC$create_blockentity_from_nbt(BlockPos pos, BlockState state, CompoundTag nbt) {
+		return BlockEntity.loadStatic(pos, state, nbt);
 	}
 	
 }

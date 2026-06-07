@@ -7,9 +7,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import me.isaiah.common.event.EventRegistery;
 import me.isaiah.common.event.block.BlockItemPlaceEvent;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.util.ActionResult;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.context.BlockPlaceContext;
 
 @Mixin(BlockItem.class)
 public class MixinBlockItem {
@@ -17,14 +17,14 @@ public class MixinBlockItem {
     /**
      * {@link BlockItemPlaceEvent}
      */
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemPlacementContext;getBlockPos()Lnet/minecraft/util/math/BlockPos;"),
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/context/BlockPlaceContext;getClickedPos()Lnet/minecraft/core/BlockPos;"),
             method = "place",cancellable = true)
-    public void icommon_doBlockItemPlaceEvent(ItemPlacementContext context, CallbackInfoReturnable<ActionResult> info) {
+    public void icommon_doBlockItemPlaceEvent(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> info) {
 
         BlockItemPlaceEvent e = (BlockItemPlaceEvent) EventRegistery.invoke(BlockItemPlaceEvent.class, 
                 new BlockItemPlaceEvent(context));
         if (e.isCanceled()) {
-            info.setReturnValue(ActionResult.SUCCESS);
+            info.setReturnValue(InteractionResult.SUCCESS);
             info.cancel();
             return;
         }

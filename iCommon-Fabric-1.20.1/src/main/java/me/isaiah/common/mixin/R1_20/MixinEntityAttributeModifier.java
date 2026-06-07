@@ -5,25 +5,25 @@ import java.util.UUID;
 import org.spongepowered.asm.mixin.Mixin;
 
 import me.isaiah.common.cmixin.IMixinEntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.attribute.EntityAttributeModifier.Operation;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 
-@Mixin(EntityAttributeModifier.class)
+@Mixin(AttributeModifier.class)
 public class MixinEntityAttributeModifier implements IMixinEntityAttributeModifier {
 
 	@Override
 	public double IC$get_value() {
-		return ((EntityAttributeModifier)(Object)this).getValue();
+		return ((AttributeModifier)(Object)this).getAmount();
 	}
 
 	@Override
 	public Operation IC$get_operation() {
-		return ((EntityAttributeModifier)(Object)this).getOperation();
+		return ((AttributeModifier)(Object)this).getOperation();
 	}
 
 	@Override
 	public UUID IC$get_uuid() {
-		return ((EntityAttributeModifier)(Object)this).getId();
+		return ((AttributeModifier)(Object)this).getId();
 	}
 	
 }

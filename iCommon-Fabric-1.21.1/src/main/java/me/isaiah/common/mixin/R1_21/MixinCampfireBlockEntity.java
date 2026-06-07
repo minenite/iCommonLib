@@ -3,15 +3,9 @@ package me.isaiah.common.mixin.R1_21;
 import me.isaiah.common.R117.ICampfireBlockEntity;
 import me.isaiah.common.event.EventRegistery;
 import me.isaiah.common.event.entity.CampfireBlockEntityCookEvent;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.CampfireBlockEntity;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,7 +14,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public class MixinCampfireBlockEntity implements ICampfireBlockEntity {
 
     @Shadow
-    public DefaultedList<ItemStack> itemsBeingCooked;
+    public NonNullList<ItemStack> items;
 
     // TODO: 1.20.5 Update
     
@@ -41,7 +35,7 @@ public class MixinCampfireBlockEntity implements ICampfireBlockEntity {
                 if (helper.IgetCookingTimes()[i] >= helper.IgetCookingTotalTimes()[i]) {
                     SimpleInventory inventorysubcontainer = new SimpleInventory(new ItemStack[]{itemstack});
                     ItemStack itemstack1 = (ItemStack) mc.getWorld().getRecipeManager().getFirstMatch(RecipeType.CAMPFIRE_COOKING, inventorysubcontainer, mc.getWorld()).map((recipecampfire) -> {
-                        return recipecampfire.value().craft(inventorysubcontainer, world.getRegistryManager());
+                        return recipecampfire.value().craft(inventorysubcontainer, world.registryAccess());
                     }).orElse(itemstack);
                     BlockPos blockposition = mc.getPos();
 
@@ -62,29 +56,29 @@ public class MixinCampfireBlockEntity implements ICampfireBlockEntity {
     }*/
 
     @Shadow
-    public int[] cookingTimes;
+    public int[] cookingProgress;
 
     @Shadow
-    public int[] cookingTotalTimes;
+    public int[] cookingTime;
 
     @Shadow
-    public void updateListeners() {
+    public void markUpdated() {
     }
 
 
     @Override
     public int[] IgetCookingTimes() {
-        return cookingTimes;
+        return cookingProgress;
     }
 
     @Override
     public int[] IgetCookingTotalTimes() {
-        return cookingTotalTimes;
+        return cookingTime;
     }
 
     @Override
     public void IupdateListeners() {
-        updateListeners();
+        markUpdated();
     }
 
 }

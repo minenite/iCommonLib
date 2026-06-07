@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.level.LevelAccessor;
 
 /**
  * iCommon Mod
@@ -51,9 +51,9 @@ public class ICommonMod implements ModInitializer {
     private static IServer iserver;
     static Loader modloader;
     
-    public static WorldAccess fake_world;
+    public static LevelAccessor fake_world;
     
-    public static void set_fake_world(WorldAccess world) {
+    public static void set_fake_world(LevelAccessor world) {
     	fake_world = world;
     }
 

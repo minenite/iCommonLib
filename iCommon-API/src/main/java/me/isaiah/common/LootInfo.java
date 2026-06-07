@@ -1,9 +1,8 @@
 package me.isaiah.common;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -15,7 +14,7 @@ public final class LootInfo {
     public static final int DEFAULT_LOOT_MODIFIER = -1;
 
     private final BlockPos pos;
-    private final World world;
+    private final Level world;
     
     //private final Location location;
     private final float luck;
@@ -23,7 +22,7 @@ public final class LootInfo {
     private final Entity lootedEntity;
     private final Entity killer;
 
-    private LootInfo(BlockPos pos, World world, float luck, int lootingModifier, Entity lootedEntity, Entity killer) {
+    private LootInfo(BlockPos pos, Level world, float luck, int lootingModifier, Entity lootedEntity, Entity killer) {
     	this.world = world;
     	this.pos = pos;
 
@@ -34,7 +33,7 @@ public final class LootInfo {
         this.killer = killer;
     }
     
-    public World get_world() {
+    public Level get_world() {
         return world;
     }
     

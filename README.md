@@ -7,14 +7,16 @@ A common library consisting of common functions aimed at simplifing the developm
 
 `iCommon-API-Configuration` Configuration API
 
-`iCommon-API-Fabric-1.18` Implmentation for 1.18.1
-
 `iCommon-API-Fabric-1.18.2` Implmentation for 1.18.2
 
-`iCommon-API-Fabric-1.19` Implmentation for 1.19.2
+`iCommon-API-Fabric-1.19.2` Implmentation for 1.19.2
 
-`iCommon-API-Fabric-1.19.4` Implmentation for 1.19.4
+`iCommon-API-Fabric-1.19.4` Implementation for 1.19.4
 
-`iCommon-API-Fabric-1.20.1` Implmentation for 1.20.1
+`iCommon-API-Fabric-1.20.1` Implementation for 1.20.1
 
-`iCommon-API-Fabric-1.20.2` Implmentation for 1.20.2/1.20.4
+`iCommon-API-Fabric-1.21.1` Implementation for 1.21.1
+
+`iCommon-API-Fabric-1.21.11` Implementation for 1.21.11
+
+`iCommon-API-Fabric-26.1` Implementation for 26.1.2+

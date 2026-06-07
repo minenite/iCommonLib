@@ -4,10 +4,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import me.isaiah.common.cmixin.IMixinMobEntity;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Mob;
 
-@Mixin(MobEntity.class)
+@Mixin(Mob.class)
 public class MixinMobEntity implements IMixinMobEntity {
 
 	// <=1.20.4: Lnet/minecraft/entity/mob/MobEntity;lootTable:Lnet/minecraft/util/Identifier;
@@ -24,7 +24,7 @@ public class MixinMobEntity implements IMixinMobEntity {
 	
 	@Override
 	public Identifier IC$get_loot_table_id() {
-		MobEntity e = ((MobEntity) (Object) this);
+		Mob e = ((Mob) (Object) this);
 		
         if (lootTable == null) {
             lootTable = e.getLootTable();

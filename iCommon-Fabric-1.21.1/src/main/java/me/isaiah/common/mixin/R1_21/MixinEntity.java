@@ -9,18 +9,18 @@ import me.isaiah.common.ICommonMod;
 import me.isaiah.common.cmixin.IMixinEntity;
 import me.isaiah.common.entity.IEntity;
 import me.isaiah.common.entity.IRemoveReason;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.world.ChunkTicketType;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 
 @Mixin(Entity.class)
 public class MixinEntity implements IMixinEntity {
@@ -29,7 +29,7 @@ public class MixinEntity implements IMixinEntity {
     public void Iremove(IRemoveReason r) {
         switch (r) {
             case DIMENSION_CHANGE:
-                removeFromDimension();
+                removeAfterChangingDimensions();
                 break;
             case DISCARDED:
                 discard();
@@ -53,11 +53,11 @@ public class MixinEntity implements IMixinEntity {
 
     @Shadow public void kill()  {} // Dimension change
     @Shadow public void discard() {} // Discard
-    @Shadow public void removeFromDimension() {} // Kill
+    @Shadow public void removeAfterChangingDimensions() {} // Kill
 
     @Override
-    public void IsendText(Text text, UUID id) {
-        IgetMCEntity().sendMessage(text);
+    public void IsendText(Component text, UUID id) {
+        IgetMCEntity().sendSystemMessage(text);
     }
 
     @Override
@@ -71,45 +71,45 @@ public class MixinEntity implements IMixinEntity {
     }
 
 	@Override
-	public boolean IC$has_status_effect(StatusEffect effect) {
+	public boolean IC$has_status_effect(MobEffect effect) {
 		Entity thiz = (Entity) (Object) this;
 		if (!(thiz instanceof LivingEntity)) {
 			ICommonMod.LOGGER.info("ERROR: Entity is not living enitity");
 			return false;
 		}
 		LivingEntity entity = (LivingEntity) thiz;
-		RegistryEntry<StatusEffect> key = Registries.STATUS_EFFECT.getEntry(effect);
-        return entity.hasStatusEffect(key);
+		Holder<MobEffect> key = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect);
+        return entity.hasEffect(key);
 	}
 
 	@Override
-	public void IC$add_status_effect(StatusEffect effect, int duration, int amp, boolean ambient, boolean particles) {
+	public void IC$add_status_effect(MobEffect effect, int duration, int amp, boolean ambient, boolean particles) {
 		Entity thiz = (Entity) (Object) this;
 		if (!(thiz instanceof LivingEntity)) {
 			ICommonMod.LOGGER.info("ERROR: Entity is not living enitity");
 			return;
 		}
 		LivingEntity entity = (LivingEntity) thiz;
-		RegistryEntry<StatusEffect> reg = Registries.STATUS_EFFECT.getEntry(effect);
-        entity.addStatusEffect(new StatusEffectInstance(reg, duration, amp, ambient, particles));
+		Holder<MobEffect> reg = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect);
+        entity.addEffect(new MobEffectInstance(reg, duration, amp, ambient, particles));
 
 	}
 
 	@Override
-	public void IC$remove_status_effect(StatusEffect effect) {
+	public void IC$remove_status_effect(MobEffect effect) {
 		Entity thiz = (Entity) (Object) this;
 		if (!(thiz instanceof LivingEntity)) {
 			ICommonMod.LOGGER.info("ERROR: Entity is not living enitity");
 			return;
 		}
 		LivingEntity entity = (LivingEntity) thiz;
-		RegistryEntry<StatusEffect> reg = Registries.STATUS_EFFECT.getEntry(effect);
-        entity.removeStatusEffect(reg);
+		Holder<MobEffect> reg = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect);
+        entity.removeEffect(reg);
 
 	}
 
 	@Override
-	public StatusEffectInstance IC$get_status_effect(int typeId) {
+	public MobEffectInstance IC$get_status_effect(int typeId) {
 		Entity thiz = (Entity) (Object) this;
 		if (!(thiz instanceof LivingEntity)) {
 			ICommonMod.LOGGER.info("ERROR: Entity is not living enitity");
@@ -118,35 +118,35 @@ public class MixinEntity implements IMixinEntity {
 		LivingEntity entity = (LivingEntity) thiz;
 		
 		// StatusEffectInstance handle = entity.getStatusEffect(Registries.STATUS_EFFECT.get(typeId));
-		RegistryEntry<StatusEffect> reg = Registries.STATUS_EFFECT.getEntry(Registries.STATUS_EFFECT.get(typeId));
-		StatusEffectInstance handle = entity.getStatusEffect(reg);
+		Holder<MobEffect> reg = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(BuiltInRegistries.MOB_EFFECT.byId(typeId));
+		MobEffectInstance handle = entity.getEffect(reg);
 		return handle;
 	}
 
 	@Override
-	public int IC$get_status_effect_id(StatusEffectInstance handle) {
-		StatusEffect effect = handle.getEffectType().comp_349();
-		return Registries.STATUS_EFFECT.getRawId(effect);
+	public int IC$get_status_effect_id(MobEffectInstance handle) {
+		MobEffect effect = handle.getEffect().value();
+		return BuiltInRegistries.MOB_EFFECT.getId(effect);
 	}
 
 	@Override
-	public void IC$teleport(ServerWorld world, double x, double y, double z) {
+	public void IC$teleport(ServerLevel world, double x, double y, double z) {
 		IC$teleport(x, y, z);
 	}
 
     private void IC$teleport(double destX, double destY, double destZ) {
     	Entity thiz = ((Entity) (Object) this);
-        if (thiz.getWorld() instanceof ServerWorld) {
-            ChunkPos chunkcoordintpair = new ChunkPos(BlockPos.ofFloored(destX, destY, destZ));
-            ((ServerWorld)thiz.getWorld()).getChunkManager().addTicket(ChunkTicketType.POST_TELEPORT, chunkcoordintpair, 0, thiz.getId());
-            thiz.getWorld().getChunk(chunkcoordintpair.x, chunkcoordintpair.z);
-            thiz.requestTeleport(destX, destY, destZ);
+        if (thiz.level() instanceof ServerLevel) {
+            ChunkPos chunkcoordintpair = new ChunkPos(BlockPos.containing(destX, destY, destZ));
+            ((ServerLevel)thiz.level()).getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkcoordintpair, 0, thiz.getId());
+            thiz.level().getChunk(chunkcoordintpair.x, chunkcoordintpair.z);
+            thiz.teleportTo(destX, destY, destZ);
         }
     }
     
 	@Override
-	public World ic$getWorld() {
-		return ((Entity) (Object) this).getWorld();
+	public Level ic$getWorld() {
+		return ((Entity) (Object) this).level();
 	}
 
 }

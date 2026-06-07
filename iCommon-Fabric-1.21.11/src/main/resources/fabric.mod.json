@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "icommon",
+  "version": "${version}+1.21.11",
+  "name": "iCommonLib 1.21.11",
+  "description": "Common API for multi-version functions. ",
+  "authors": [
+    "Isaiah"
+  ],
+  "contact": {
+    "homepage": "https://cardboardpowered.org/icommon",
+    "sources": "https://github.com/CardboardPowered/iCommonLib"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/modid/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "me.isaiah.common.ICommonModFabric"
+    ]
+  },
+  "mixins": [
+    "icommon.mixins.json",
+    "icommon-117.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": ">=1.21.9- <1.21.12-"
+  }
+}

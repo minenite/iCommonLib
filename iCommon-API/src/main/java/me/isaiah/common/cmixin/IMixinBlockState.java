@@ -1,9 +1,9 @@
 package me.isaiah.common.cmixin;
 
 import me.isaiah.common.fabric.FabricWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import me.isaiah.common.block.IBlockState;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
 
 public interface IMixinBlockState {
 
