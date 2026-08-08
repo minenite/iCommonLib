@@ -76,8 +76,8 @@ tasks.getByName<ProcessResources>("processResources") {
         if(null != System.getenv("BUILD_NUMBER")){
 			expand(mutableMapOf("version" to System.getenv("BUILD_NUMBER").toString()))
 		} else {
-			// "dev" is not semver, which makes Fabric Loader warn on every start
-			expand(mutableMapOf("version" to "0"))
+			// Must be full semver or Fabric Loader warns on every start
+			expand(mutableMapOf("version" to "0.0.0"))
 		}
     }
 }
